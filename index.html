@@ -1,0 +1,632 @@
+<!--
+TODO:
+
+Design:
+- Synthesis / Explore
+- splash overlay for V0.1
+-Bank
+
+
+Implement:
+- import all the features from utomata index
+- Examples window
+- analysis test (histogram and other metrics)
+- Bank Window
+- stay in splash mode on incompatible hardware + messege
+
+Create:
+- language reference
+- A workflow that allows interactive evolutionary algorithms using explore and the bank
+
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>utomata</title>
+
+	<link rel="stylesheet" href="css/jquery-ui.css">
+	<link rel="stylesheet" href="css/index.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- <script src="js/seedrandom.js"></script> -->
+
+
+  <!-- <script src="js/utomata.js"></script>-->
+  <script src="js/ace.min.js"></script>
+	<script src="js/mode-glsl.min.js" type="text/javascript"></script>
+	<script src="js/theme-iplastic.min.js" type="text/javascript"></script>
+
+  <script src="js/seedrandom.min.js"></script>
+  <script src="../utomata/utomata.js"></script>
+  <script src="js/d3.v5.min.js"></script>
+  <script src="js/p5.min.js"></script>
+  <script src="js/jquery.js"></script>
+  <script src="js/jquery-ui.js"></script>
+  <script src="js/examples.js"></script>
+
+  <script src="js/three.min.js" type="text/javascript"></script>
+  <script src="js/OrbitControls.js" type="text/javascript"></script>
+
+  <script src="js/ThreeWindow.js"></script>
+  <script src="js/synth.js"></script>
+  <script src="js/Analysis.js"></script>
+  <script src="js/jogDial.min.js"></script>
+
+  <script src="js/index.js"></script>
+
+</head>
+<body>
+<div id="windowBorder">
+</div>
+
+
+<div id="mainMenu">
+	<h1 id="logo">utomata</h1>
+	<p id="fileBtn" class="menuItem">File</p>
+	<p id="editBtn" class="menuItem">Edit</p>
+	<p id="viewBtn" class="menuItem">View</p>
+	<p id="windowBtn" class="menuItem">Window</p>
+	<p id="helpBtn" class="menuItem">Help</p>
+</div>
+
+<!-- MAIN MAENU -->
+<ul id="fileMenu">
+  <li><div>New Tab</div></li>
+  <li onclick="duplicatePage(false)"><div>Duplicate Tab</div></li>
+  <li onclick="restoreFromLocal()"><div>Restore (from local)</div></li>
+  <hr>
+  <li onclick="copyProgramLink()"><div>Copy Permalink</div></li>
+  <li onclick="saveToLocal()"><div>Save (to local)</div></li>
+	<li onclick="saveHTML()"><div>Export .HTML</div></li>
+  <li onclick="saveCollection()"><div>Export Collection</div></li>
+
+	<li onclick="saveImage('utomata', 'download')" ><div>Download .png</div></li>
+</ul>
+
+<ul id="editMenu">
+	<li onclick="resetUtomata()"><div>Setup</div></li>
+	<li onclick="runPgm(!isRunning)"><div id="menuRunBtn">Run</div></li>
+	<hr>
+  <li onclick="collectPgm()"><div>Add to Collection</div></li>
+  <li onclick="clearCollection()"><div>Clear Collection</div></li>
+  <li class="ui-state-disabled" id="clearInputImg" onclick="clearInputImage()"><div>Clear Input Image</div></li>
+</ul>
+
+<ul id="viewMenu">
+	<li onclick="toggfullscreen()"><div>Toggle Full Screen</div></li>
+	<li onclick="resetWorkspace()"><div>Reset Workspace</div></li>
+  <li onclick="resetWorkspace()">
+    <div>Workspace</div>
+    <ul>
+      <li>Default</li>
+      <li>Synthesis</li>
+      <li>Analysis</li>
+      <li>3D</li>
+    </ul>
+  </li>
+
+  <li>
+    <div>Editor Font Size</div>
+    <ul id="fontSizeMenu" class="subNumMenu">
+      <li><div>12</div></li>
+      <li><div>14</div></li>
+      <li><div>16</div></li>
+      <li><div>21</div></li>
+      <li><div>24</div></li>
+      <li><div>36</div></li>
+    </ul>
+  </li>
+	<li onclick="clearConsole()"><div>Clear Console</div></li>
+</ul>
+
+<ul id="windowMenu">
+  <li><div onclick="toggleCodeWin()">Code</div></li>
+	<li><div onclick="toggleSystemWin()">View</div></li>
+  <li><div onclick="toggleControlWin()">Control</div></li>
+  <li><div onclick="toggleThreeWin()">3D View</div></li>
+  <li><div onclick="toggleSynthesisWin()">Synthesis</div></li>
+	<li><div onclick="toggleAnalysisWin()">Analysis</div></li>
+	<li><div onclick="toggleCollectionWin()">Collection</div></li>
+  <li><div onclick="toggleConsoleWin()">Console</div></li>
+	<li><div onclick="toggleLearningWin()">Learning</div></li>
+
+	<hr>
+	<li><div onclick="hideAllWindows()">Hide All</div></li>
+	<li><div onclick="showAllWindows()">Show All</div></li>
+</ul>
+
+<ul id="helpMenu">
+	<li><div>About</div></li>
+	<li><div>utomata.js</div></li>
+  <li><div>Laboratory of Babel</div></li>
+  <hr>
+	<li class="ui-state-disabled" ><div>Tutorials</div></li>
+  <li class="ui-state-disabled" ><div>Examples</div></li>
+	<li class="ui-state-disabled" ><div>Language Reference</div></li>
+
+</ul>
+
+
+<!-- DESKTOP -->
+<div id="desktop" class="snapper" >
+
+
+
+
+
+	<!--  //////////////////// WINDOWS ////////////////////////  -->
+
+
+
+
+
+	<!-- CODE -->
+	<div id="codeWindow" class="window snapper" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+		<div class="handle">
+			<div class="handleBtn closeBtn"></div>
+			<div class="handleBtn maxBtn"></div>
+			<h2 class="winTitle">Code</h2>
+	  </div>
+		<div class="winContentWarpper">
+			<div class="winContent ace-container">
+				<textarea spellcheck="false" id="utoPgm">vec(random())</textarea>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- System -->
+	<div id="systemWindow" class="window snapper">
+	  <div class="handle">
+			<div class="handleBtn closeBtn"></div>
+			<div class="handleBtn maxBtn"></div>
+			<h2 class="winTitle">View</h2>
+	  </div>
+		<div class="winContentWarpper">
+			<div class="winContent">
+  			<!-- WINDOW CONTENT -->
+  			<div id="utomataContainer">
+
+  			</div>
+
+			</div>
+
+		</div>
+    <div id="systemInfo">
+        <div id="statusBulb"></div>
+        <div id="statusText"></div>
+        <div id="mouseCoords"></div>
+    </div>
+	</div>
+
+
+  <!-- Learning -->
+  <div id="learnWindow" class="window snapper">
+    <div class="handle">
+      <div class="handleBtn closeBtn"></div>
+      <h2 class="winTitle">Learning</h2>
+    </div>
+    <div class="winContentWarpper">
+      <div class="winContent">
+      <!-- WINDOW CONTENT -->
+      <div class="tabular" id="leaningTabs">
+      <ul>
+        <li><a href="#leaningTabs-1">Tutorials</a></li>
+        <li><a href="#leaningTabs-2">Examples</a></li>
+        <li><a href="#leaningTabs-3">Reference</a></li>
+      </ul>
+      <div id="leaningTabs-1">
+        Tutorials
+      </div>
+      <div id="leaningTabs-2">
+        <ul id="examplesList">
+
+        </ul>
+      </div>
+      <div id="leaningTabs-3">
+        Ref
+      </div>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+	<!-- Control -->
+	<div id="controlWindow" class="window snapper">
+	  <div class="handle">
+			<div class="handleBtn closeBtn"></div>
+			<h2 class="winTitle">Control</h2>
+	  </div>
+		<div class="winContentWarpper">
+			<div id="controlPanel" class="winContent">
+  			<!-- WINDOW CONTENT -->
+
+        <div id="stepCounter">0</div>
+        <div class="flexRow">
+          <div onclick="resetUtomata()" class="controlBtn" id="configBtn"></div>
+          <div onclick="runPgm(!isRunning)" class="controlBtn play" id="runBtn"></div>
+          <div onclick="uto.step();analyzer.calcHistogram(getImgFromUTO(uto).src);" class="controlBtn" id="nextBtn"></div>
+        </div>
+        <div class="flexRow">
+        <label class="controlInputLabel" id="controlWid" for="widthInput">
+          Width
+          <input onchange="wid = this.value;resetUtomata()" class="controlInput" id="widthInput" type="number" name="" value="1024" size="4">
+        </label>
+
+        <label class="controlInputLabel" id="controlHei" for="heightInput">
+          Height
+          <input onchange="hei = this.value;resetUtomata()" class="controlInput" id="heightInput" type="number" name="" value="1024" size="4">
+        </label>
+        </div>
+
+        <div class="flexRow">
+        <label class="controlInputLabel shortInput" id="controlZoom" for="zoomInput">
+          Zoom
+          <input onchange="uto.zoom(zoom = this.value)"class="controlInput" id="zoomInput" type="number" name="" value="1" size="2">
+        </label>
+
+        <label class="controlInputLabel shortInput" id="controlFps" for="fpsInput">
+          Fps
+          <input onchange="uto.fps(fps = this.value)" class="controlInput" id="fpsInput" type="number" name="" value="60" size="2">
+        </label>
+
+        <label class="controlInputLabel" id="controlEdge" for="edgeInput">
+          Edge
+          <select onchange="uto.edge(edge = this.value)" class="controlInput selectMenu" id="edgeInput" name="">
+            <option value="REPEAT">Wrap</option>
+            <option value="CLAMP">Clamp</option>
+          </select>
+        </label>
+      </div>
+
+
+      </div>
+
+		</div>
+	</div>
+
+	<!-- Console -->
+	<div id="consoleWindow" class="window snapper">
+	  <div class="handle">
+			<div class="handleBtn closeBtn"></div>
+			<h2 class="winTitle">Console</h2>
+	  </div>
+		<div class="winContentWarpper">
+			<div class="winContent" id="console">
+			<!-- WINDOW CONTENT -->
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+  <!-- collection  -->
+  <div id="collectionWindow" class="window snapper" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)" >
+    <div class="handle">
+      <div class="handleBtn closeBtn"></div>
+      <div class="handleBtn maxBtn"></div>
+      <h2 class="winTitle">Collection</h2>
+    </div>
+    <div class="winContentWarpper">
+      <div class="winContent" id="console">
+      <!-- WINDOW CONTENT -->
+
+      <div id="collectionUtoContainer">
+        <div class="controlBtn" id="removeCollectionItem"></div>
+        <div class="controlBtn"id="editCollectionItem"></div>
+        <div class="controlBtn"id="resetCollectionItem"></div>
+
+        <div class="slider" id="rankCollectionItem">
+          <div class="ui-slider-handle custom-handle "></div>
+        </div>
+      </div>
+
+        <div id="collectionGrid">
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- analysis  -->
+  <div id="analysisWindow" class="window snapper">
+    <div class="handle">
+      <div class="handleBtn closeBtn"></div>
+      <h2 class="winTitle">Analysis</h2>
+    </div>
+    <div class="winContentWarpper">
+      <div class="winContent" id="console">
+      <!-- WINDOW CONTENT -->
+        <div id="analysisCanvasContainer">
+
+        </div>
+        <div id="analysisInfo">
+
+        </div>
+
+        <div id="programTreeContainer">
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- threeD  -->
+  <div id="threeWindow" class="window snapper">
+    <div class="handle">
+      <div class="handleBtn closeBtn"></div>
+      <div class="handleBtn maxBtn"></div>
+      <h2 class="winTitle">3D View</h2>
+    </div>
+    <div class="winContentWarpper">
+      <div class="winContent" id="threeContainer">
+
+      </div>
+      <div id="threeStats">
+        <span class="red">x:</span><input class="threeInput" id="thX"value="V.x">,
+        <span class="green">y:</span><input class="threeInput" id="thY"value="V.y">,
+        <span class="blue">z:</span><input class="threeInput" id="thZ"value="V.z"><br>
+
+        <span class="red">r:</span><input class="threeInput" id="thR"value="V.r">,
+        <span class="green">g:</span><input class="threeInput" id="thG"value="V.g">,
+        <span class="blue">b:</span><input class="threeInput" id="thB"value="V.b"><br>
+
+        <span class="grey">i:</span><input class="threeInput" id="thI"value="64.0">,
+        <span class="grey">j:</span><input class="threeInput" id="thJ"value="64.0">
+        <span class="grey">w:</span><input class="threeInput" id="thW"value="5.0"><br>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SYNTHESIS -->
+  <div id="synthesisWindow" class="window snapper" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+    <div class="handle">
+      <div class="handleBtn closeBtn"></div>
+      <h2 class="winTitle">Synthesis</h2>
+    </div>
+    <div class="winContentWarpper">
+      <div class="winContent">
+
+      <div class="tabular synthParamGroup" id="synthTabs">
+
+        <ul>
+          <li><a href="#synthTabs-1">Manual</a></li>
+          <li><a href="#synthTabs-2">Auto</a></li>
+        </ul>
+
+        <div id="synthTabs-1">
+
+          <div id="dialContainer">
+            <div id="synthSeedDial">
+            </div>
+          </div>
+
+          <label id="synthSeedInputContainer" class="" for="synthSeedInput">
+            Seed
+            <input class="" id="synthSeedInput" type="number" name="" value="132" size="16">
+          </label>
+        </div>
+
+        <div id="synthTabs-2">
+
+          <div id="synthUtoContainerWrapper">
+            <div id="synthUtoContainer">
+
+            </div>
+          </div>
+            <input class="" id="synthIntervalInput" type="number" name="" value="60">
+            <button id="autoGenSynthBtn" type="button" name="button">Start</button>
+        </div>
+      </div>
+
+        <div class="synthParamGroup">
+          <h3>Preset</h3>
+          <select class="selectMenu" id="synthPresetInput" name="">
+            <option value="BASIC">Basic</option>
+            <option value="UNIFORM">Uniform</option>
+            <option value="HOUSE">House Special</option>
+          </select>
+        </div>
+
+        <div class="synthParamGroup">
+          <h3>Setup</h3>
+          <textarea id="synthInput-setup" type="text" rows="4" name="" value=""></textarea>
+        </div>
+
+        <div class="synthParamGroup">
+          <h3>Values</h3>
+          <label class="synthValueInputLabel">Min: <input id="synthInput-minVal" class="synthValueInput" type="text" name="" value="0.0"></label>
+          <label class="synthValueInputLabel">Max: <input id="synthInput-maxVal" class="synthValueInput" type="text" name="" value="1.0"></label>
+        </div>
+
+        <div class="synthParamGroup">
+          <h3>Variables</h3>
+          <div id="variableSliders">
+            <div class="opSlider" id="synthInput-V">
+              <label>V</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-V3">
+              <label>V3</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-V4">
+              <label>V4</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-V5">
+              <label>V5</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-V8">
+              <label>V8</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-V9">
+              <label>V9</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="synthParamGroup">
+          <h3>Unary OP</h3>
+          <div id="unaryOPSliders">
+            <div class="opSlider" id="synthInput-sqt">
+              <label>sqt</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-log">
+              <label>log</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-sgn">
+              <label>sgn</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-frc">
+              <label>frc</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-cil">
+              <label>cil</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-flr">
+              <label>flr</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-rnd">
+              <label>rnd</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-nrm">
+              <label>nrm</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-sin">
+              <label>sin</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-cos">
+              <label>cos</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-tan">
+              <label>tan</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-atn">
+              <label>atn</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="synthParamGroup">
+          <h3>Binary OP</h3>
+          <div id="binaryOPSliders">
+            <div class="opSlider" id="synthInput-add">
+              <label>add</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-sub">
+              <label>sub</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-mlt">
+              <label>mlt</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-div">
+              <label>div</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-pow">
+              <label>pow</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-stp">
+              <label>stp</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-mod">
+              <label>mod</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-min">
+              <label>min</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-max">
+              <label>max</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-eql">
+              <label>eql</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-dot">
+              <label>dot</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+            <div class="opSlider" id="synthInput-dst">
+              <label>dst</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="synthParamGroup">
+          <h3>Misc</h3>
+          <div id="MiscSliders">
+            <div class="opSlider" id="synthInput-val">
+              <label>val</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+            <div class="opSlider" id="synthInput-random">
+              <label style='left:-4.4em;font-size: 8px'>random</label>
+              <div class="ui-slider-handle custom-handle"></div>
+            </div>
+            <div class="opSlider" id="synthInput-noise">
+              <label style='left: -4.0em; font-size: 8px'>noise</label>
+              <div class="ui-slider-handle custom-handle "></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div><!-- Desktop -->
+
+</body>
+</html>
