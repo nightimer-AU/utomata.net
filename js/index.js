@@ -1,7 +1,4 @@
-
-
 /*
-
 
 
       _                        _                     _
@@ -11,7 +8,7 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
 \__,_|\__\___/|_| |_| |_|\__,_|\__\__,_(_)_| |_|\___|\__|
 
 
-// main js file for utomata.net                                               
+// main js file for utomata.net
 
 */
 
@@ -389,11 +386,29 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
 
 		editor.getSession().on("change", function(){
 			editor.resize();
+
+			var pgm = editor.getValue();
+			var pgmSplit = pgm.split(/update\s*=/)[1];
+
+			// console.log(pgmSplit);
+
+
+				var obj;
+				if(pgmSplit != "" && pgmSplit !== undefined){
+					// console.log(pgmSplit);
+					obj = translateUtoPgmToObj(pgmSplit);
+					analyzer.VisualizePgm( obj , "programTreeContainer");
+				}else if(pgm != "" && pgm !== undefined){
+					// console.log(pgm);
+					obj = translateUtoPgmToObj(pgm);
+					analyzer.VisualizePgm( obj , "programTreeContainer");
+				}
+
+
 			if(isRunning){
 				clearTimeout(editorTimeOut);
 				editorTimeOut = setTimeout(function(){
           runPgm(true);
-          // analyzer.VisualizePgm( editor.getValue(), "programTreeContainer");
 				}, 300);
 			}
 		});
@@ -477,12 +492,25 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
       },
       slide: function( event, ui ) {
         $(this).find( ".custom-handle" ).text( ui.value );
-        var k = $(this).find("div").attr("id");
-        k = k.substr(9); // remove  "opSlider-"
-        synthesizer.setParam(k, ui.value);
+        var k = $(this).attr("id");
+        synthesizer.setParam(k.substr(11), ui.value);
       },
       min: 0,
       max: 9,
+      step: 1,
+    });
+
+		$( ".ratioSlider" ).slider({
+      create: function() {
+        $(this).find( ".custom-handle" ).text( $( this ).slider( "value" ) );
+      },
+      slide: function( event, ui ) {
+        $(this).find( ".custom-handle" ).text( ui.value );
+        var k = $(this).attr("id");
+        synthesizer.setParam(k.substr(11) + "Rat", ui.value);
+      },
+      min: 0,
+      max: 99,
       step: 1,
     });
 
@@ -502,6 +530,7 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
         applySynthPreset($(this).children("option:selected").val());
     });
 
+
     applySynthPreset("BASIC");
   }
 
@@ -513,23 +542,31 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
     var params = synthesizer.getParams();
 
     for (const prop in params.unaryOP){
-      $("#synthInput-" + prop).slider('value', params.unaryOP[prop]);
-      $("#synthInput-" + prop).find( ".custom-handle" ).text(params.unaryOP[prop]);
+      setSlider($("#synthInput-" + prop), params.unaryOP[prop]);
     }
     for (const prop in params.binaryOP){
-      $("#synthInput-" + prop).slider('value', params.binaryOP[prop]);
-      $("#synthInput-" + prop).find( ".custom-handle" ).text(params.binaryOP[prop]);
+      setSlider($("#synthInput-" + prop), params.binaryOP[prop]);
     }
     for (const prop in params.vars){
-      $("#synthInput-" + prop).slider('value', params.vars[prop]);
-      $("#synthInput-" + prop).find( ".custom-handle" ).text(params.vars[prop]);
+      setSlider($("#synthInput-" + prop), params.vars[prop]);
     }
 
     $("#synthInput-setup").val(params.setup);
     $("#synthInput-minVal").val(params.minVal);
     $("#synthInput-maxVal").val(params.maxVal);
-
+		setSlider($("#synthInput-vals"), params.valsRat);
+		setSlider($("#synthInput-vars"), params.varsRat);
+		setSlider($("#synthInput-vecs"), params.vecsRat);
+		setSlider($("#synthInput-unary"), params.unaryRat);
+		setSlider($("#synthInput-binary"), params.binaryRat);
+		setSlider($("#synthInput-misc"), params.miscRat);
   }
+
+
+	function setSlider(_slider, val){
+		_slider.slider('value', val);
+		_slider.find( ".custom-handle" ).text(val);
+	}
 
   function initAnalysisWindow(){
     analyzer = new Analyzer('analysisCanvasContainer');
@@ -766,6 +803,12 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
     });
   }
 
+
+
+
+
+
+
   // add to collection shortcut
   function collectPgm(){
     addPgmToCollection(editor.getValue());
@@ -876,6 +919,97 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
 	}
 
 
+
+
+
+
+
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+	////////////////// CONVERSION  ///////////////////////////
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+
+
+  function translateUtoPgmToObj(pgm){
+
+    var obj = {};
+
+    pgm = pgm.replace(/\s+/g, ''); // strip all whitespace
+
+    var nextBrace = pgm.search(/\(/);
+    var lastbrace = nextBrace + findClosingBracket(pgm.slice(nextBrace+1));
+    var contents = pgm.slice(nextBrace+1, lastbrace+1);
+
+    if(nextBrace > -1){
+      obj.name = pgm.slice(0, nextBrace);
+      var childArr = splitChildren( contents );
+      if(childArr.length > 0){
+        obj.children = [];
+        for(var i = 0 ; i < childArr.length; i++ ){
+          obj.children.push( translateUtoPgmToObj(childArr[i]));
+        }
+      }
+    }else{
+      obj.name = pgm;
+    }
+
+    return obj;
+  }
+
+
+  function splitChildren( str ){
+
+    var res = [];
+
+    var hasNextChild = true;
+
+    while(hasNextChild){
+
+      hasNextChild = false;
+
+      var nextBrace = str.search(/\(/);
+      var lastbrace = nextBrace + findClosingBracket(str.slice(nextBrace+1));
+      var nextChild = str.slice(0 ,lastbrace +2);
+      var afterLastBrace = str.slice(lastbrace +2);
+      var comma = afterLastBrace.search( /\,/);
+
+      res.push(nextChild);
+      // does after have a next child?
+      if(comma > -1){
+
+        var len = afterLastBrace.match(/\,/)[0].length;
+        afterLastBrace = afterLastBrace.slice( comma + len );
+        hasNextChild = true;
+        str = afterLastBrace;
+      }
+    }
+
+
+    return res;
+  }
+
+
+	// find the position of the closing bracket of the string
+	// assuming the str starts just after the openening one (exclusive)
+	function findClosingBracket(str) {
+		let depth = 1;
+		for (let i = 0; i < str.length; i++) {
+			switch (str[i]) {
+			case '(':
+				depth++;
+				break;
+			case ')':
+				if (--depth == 0) {
+					return i;
+				}
+				break;
+			}
+		}
+		return -1;    // No matching closing parenthesis
+	}
 
 
 
@@ -1064,11 +1198,20 @@ _   _| |_ ___  _ __ ___   __ _| |_ __ _   _ __   ___| |_
               var res = event.target.result;
               var arr = parseCSV(res);
               for(var i = 0; i < arr.length; i++){
+								var pgm;
                 if(Array.isArray(arr)){
-                  addPgmToCollection(arr[i][0]);
+									pgm = arr[i][0];
                 }else{
-                  addPgmToCollection(arr[i]);
+									pgm = arr[i];
                 }
+								if(pgm.search("update") == -1){
+									pgm = "update = " +  pgm  + ";";
+								}
+								if(pgm.search("setup") == -1){
+									pgm = "setup = " + $("#synthInput-setup").val() + ";\n"+  pgm ;
+								}
+
+								addPgmToCollection(pgm);
               }
               configCollectionRecursive($(".collectionItem").first());
               autoConfiguringCollection = true;

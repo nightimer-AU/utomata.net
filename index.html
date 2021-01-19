@@ -2,21 +2,15 @@
 TODO:
 
 Design:
-- Synthesis / Explore
 - splash overlay for V0.1
--Bank
 
 
 Implement:
-- import all the features from utomata index
-- Examples window
-- analysis test (histogram and other metrics)
-- Bank Window
 - stay in splash mode on incompatible hardware + messege
 
 Create:
 - language reference
-- A workflow that allows interactive evolutionary algorithms using explore and the bank
+- A workflow that allows interactive evolutionary algorithms
 
 -->
 
@@ -26,31 +20,27 @@ Create:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>utomata</title>
-
+  <link rel="shortcut icon" href="images/favicon.png">
 	<link rel="stylesheet" href="css/jquery-ui.css">
 	<link rel="stylesheet" href="css/index.css">
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- <script src="js/seedrandom.js"></script> -->
 
+  <script src="../utomata/utomata.js"></script>
+  <!-- <script src="js/utomata.js"></script> -->
 
-  <!-- <script src="js/utomata.js"></script>-->
   <script src="js/ace.min.js"></script>
 	<script src="js/mode-glsl.min.js" type="text/javascript"></script>
 	<script src="js/theme-iplastic.min.js" type="text/javascript"></script>
-
   <script src="js/seedrandom.min.js"></script>
-  <script src="../utomata/utomata.js"></script>
   <script src="js/d3.v5.min.js"></script>
   <script src="js/p5.min.js"></script>
   <script src="js/jquery.js"></script>
   <script src="js/jquery-ui.js"></script>
   <script src="js/examples.js"></script>
-
   <script src="js/three.min.js" type="text/javascript"></script>
   <script src="js/OrbitControls.js" type="text/javascript"></script>
-
   <script src="js/ThreeWindow.js"></script>
   <script src="js/synth.js"></script>
   <script src="js/Analysis.js"></script>
@@ -59,6 +49,7 @@ Create:
   <script src="js/index.js"></script>
 
 </head>
+
 <body>
 <div id="windowBorder">
 </div>
@@ -406,6 +397,17 @@ Create:
           <li><a href="#synthTabs-2">Auto</a></li>
         </ul>
 
+        <div id="synthTabs-2">
+
+          <div id="synthUtoContainerWrapper">
+            <div id="synthUtoContainer">
+
+            </div>
+          </div>
+            <input class="" id="synthIntervalInput" type="number" name="" value="60">
+            <button id="autoGenSynthBtn" type="button" name="button">Start</button>
+        </div>
+
         <div id="synthTabs-1">
 
           <div id="dialContainer">
@@ -419,16 +421,8 @@ Create:
           </label>
         </div>
 
-        <div id="synthTabs-2">
 
-          <div id="synthUtoContainerWrapper">
-            <div id="synthUtoContainer">
 
-            </div>
-          </div>
-            <input class="" id="synthIntervalInput" type="number" name="" value="60">
-            <button id="autoGenSynthBtn" type="button" name="button">Start</button>
-        </div>
       </div>
 
         <div class="synthParamGroup">
@@ -436,7 +430,7 @@ Create:
           <select class="selectMenu" id="synthPresetInput" name="">
             <option value="BASIC">Basic</option>
             <option value="UNIFORM">Uniform</option>
-            <option value="HOUSE">House Special</option>
+            <option value="ZERO">Zero</option>
           </select>
         </div>
 
@@ -445,182 +439,210 @@ Create:
           <textarea id="synthInput-setup" type="text" rows="4" name="" value=""></textarea>
         </div>
 
-        <div class="synthParamGroup">
+
+        <div class="synthParamGroupHeader">
           <h3>Values</h3>
-          <label class="synthValueInputLabel">Min: <input id="synthInput-minVal" class="synthValueInput" type="text" name="" value="0.0"></label>
-          <label class="synthValueInputLabel">Max: <input id="synthInput-maxVal" class="synthValueInput" type="text" name="" value="1.0"></label>
+          <div class="ratioSlider slider" id="synthInput-vals">
+            <div class="ui-slider-handle custom-handle"></div>
+          </div>
         </div>
 
         <div class="synthParamGroup">
-          <h3>Variables</h3>
-          <div id="variableSliders">
-            <div class="opSlider" id="synthInput-V">
-              <label>V</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
-            <div class="opSlider" id="synthInput-V3">
-              <label>V3</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
-            <div class="opSlider" id="synthInput-V4">
-              <label>V4</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
-            <div class="opSlider" id="synthInput-V5">
-              <label>V5</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
-            <div class="opSlider" id="synthInput-V8">
-              <label>V8</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
-            <div class="opSlider" id="synthInput-V9">
-              <label>V9</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
+          <label class="synthValueInputLabel">Min <input id="synthInput-minVal" class="synthValueInput" type="text" name="" value="0.0"></label>
+          <label class="synthValueInputLabel">Max <input id="synthInput-maxVal" class="synthValueInput" type="text" name="" value="1.0"></label>
+          <div class="ratioSlider slider" id="synthInput-vecs">
+            <label>Vectors</label>
+            <div class="ui-slider-handle custom-handle"></div>
           </div>
         </div>
 
 
+        <div class="synthParamGroupHeader">
+          <h3>Variables</h3>
+          <div class="ratioSlider slider" id="synthInput-vars">
+            <div class="ui-slider-handle custom-handle"></div>
+          </div>
+        </div>
+
         <div class="synthParamGroup">
-          <h3>Unary OP</h3>
-          <div id="unaryOPSliders">
-            <div class="opSlider" id="synthInput-sqt">
+          <div class="opSlider slider" id="synthInput-V">
+            <label>V</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div>
+          <div class="opSlider slider" id="synthInput-V3">
+            <label>V3</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div>
+          <div class="opSlider slider" id="synthInput-V4">
+            <label>V4</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div>
+          <div class="opSlider slider" id="synthInput-V5">
+            <label>V5</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div>
+          <div class="opSlider slider" id="synthInput-V8">
+            <label>V8</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div>
+          <div class="opSlider slider" id="synthInput-V9">
+            <label>V9</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div>
+        </div>
+
+
+        <div class="synthParamGroupHeader">
+          <h3>Unary Operators</h3>
+          <div class="ratioSlider slider" id="synthInput-unary">
+            <div class="ui-slider-handle custom-handle"></div>
+          </div>
+        </div>
+
+        <div class="synthParamGroup">
+            <div class="opSlider slider" id="synthInput-sqt">
               <label>sqt</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-log">
+            <div class="opSlider slider" id="synthInput-log">
               <label>log</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-sgn">
+            <div class="opSlider slider" id="synthInput-sgn">
               <label>sgn</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-frc">
+            <div class="opSlider slider" id="synthInput-frc">
               <label>frc</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-cil">
+            <div class="opSlider slider" id="synthInput-cil">
               <label>cil</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-
-            <div class="opSlider" id="synthInput-flr">
+            <div class="opSlider slider" id="synthInput-flr">
               <label>flr</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-
-            <div class="opSlider" id="synthInput-rnd">
+            <div class="opSlider slider" id="synthInput-rnd">
               <label>rnd</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-nrm">
+            <div class="opSlider slider" id="synthInput-nrm">
               <label>nrm</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-sin">
+            <div class="opSlider slider" id="synthInput-sin">
               <label>sin</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-cos">
+            <div class="opSlider slider" id="synthInput-cos">
               <label>cos</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-tan">
+            <div class="opSlider slider" id="synthInput-tan">
               <label>tan</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-atn">
+            <div class="opSlider slider" id="synthInput-atn">
               <label>atn</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
+        </div>
+
+
+        <div class="synthParamGroupHeader">
+          <h3>Binary Operators</h3>
+          <div class="ratioSlider slider" id="synthInput-binary">
+            <div class="ui-slider-handle custom-handle"></div>
           </div>
         </div>
 
         <div class="synthParamGroup">
-          <h3>Binary OP</h3>
-          <div id="binaryOPSliders">
-            <div class="opSlider" id="synthInput-add">
+            <div class="opSlider slider" id="synthInput-add">
               <label>add</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
-            <div class="opSlider" id="synthInput-sub">
+            <div class="opSlider slider" id="synthInput-sub">
               <label>sub</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-mlt">
+            <div class="opSlider slider" id="synthInput-mlt">
               <label>mlt</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-div">
+            <div class="opSlider slider" id="synthInput-div">
               <label>div</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-pow">
+            <div class="opSlider slider" id="synthInput-pow">
               <label>pow</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-stp">
+            <div class="opSlider slider" id="synthInput-stp">
               <label>stp</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-mod">
+            <div class="opSlider slider" id="synthInput-mod">
               <label>mod</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-min">
+            <div class="opSlider slider" id="synthInput-min">
               <label>min</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-max">
+            <div class="opSlider slider" id="synthInput-max">
               <label>max</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-eql">
+            <div class="opSlider slider" id="synthInput-eql">
               <label>eql</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-dot">
+            <div class="opSlider slider" id="synthInput-dot">
               <label>dot</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
 
-            <div class="opSlider" id="synthInput-dst">
+            <div class="opSlider slider" id="synthInput-dst">
               <label>dst</label>
               <div class="ui-slider-handle custom-handle "></div>
             </div>
+        </div>
 
+
+        <div class="synthParamGroupHeader">
+          <h3>Misc</h3>
+          <div class="ratioSlider slider" id="synthInput-misc">
+            <div class="ui-slider-handle custom-handle"></div>
           </div>
         </div>
 
         <div class="synthParamGroup">
-          <h3>Misc</h3>
-          <div id="MiscSliders">
-            <div class="opSlider" id="synthInput-val">
-              <label>val</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
-            <div class="opSlider" id="synthInput-random">
-              <label style='left:-4.4em;font-size: 8px'>random</label>
-              <div class="ui-slider-handle custom-handle"></div>
-            </div>
-            <div class="opSlider" id="synthInput-noise">
-              <label style='left: -4.0em; font-size: 8px'>noise</label>
-              <div class="ui-slider-handle custom-handle "></div>
-            </div>
+          <!-- <div class="opSlider slider" id="synthInput-val">
+            <label>val</label>
+            <div class="ui-slider-handle custom-handle "></div>
+          </div> -->
+          <div class="opSlider slider" id="synthInput-random">
+            <label style='left:-4.4em;font-size: 8px'>random</label>
+            <div class="ui-slider-handle custom-handle"></div>
+          </div>
+          <div class="opSlider slider" id="synthInput-noise">
+            <label style='left: -4.0em; font-size: 8px'>noise</label>
+            <div class="ui-slider-handle custom-handle "></div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

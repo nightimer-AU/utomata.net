@@ -314,7 +314,7 @@ button:active{
 .synthValueInputLabel{
 
 	font-family: 'IBM Plex Mono', monospace;
-	font-size: 11px;
+	font-size: 10px;
 	margin: 0 4px 4px 0;
 	display: block;
 }
@@ -558,17 +558,29 @@ button:active{
   left: -3px;
 }
 
-.accordheader{
-	display: flex !important;
-}
-.accordheader h3{
-	font-size: 12px;
-	font-weight: normal;
+
+
+.slider{
+	margin: 6px 10px;
+	padding: 0;
+	height: 16px;
+	border: 1px inset #999;
+	height: 0;
 }
 
-.accordheader>div{
-	flex:1;
-}
+
+.custom-handle {
+    width: 3em;
+    height: 16px;
+    text-align: center;
+		vertical-align: middle;
+		top: -8px !important;
+		border: 2px outset rgb(170, 170, 170);
+		background-color: #DADAD4;
+		font-size: 10px;
+
+  }
+
 
 .opSlider{
 	margin: 8px 13px 8px 27px !important;
@@ -637,35 +649,6 @@ input[type=number]::-webkit-outer-spin-button {
 
 
 
-.slider{
-	margin: 6px 10px;
-	padding: 0;
-	height: 16px;
-	border: 1px inset #999;
-	height: 0;
-}
-
-.opSlider{
-	margin: 6px 10px;
-	padding: 0;
-	height: 16px;
-	border: 1px inset #999;
-	height: 0;
-}
-
-
-
-.custom-handle {
-    width: 3em;
-    height: 16px;
-    text-align: center;
-		vertical-align: middle;
-		top: -8px !important;
-		border: 2px outset rgb(170, 170, 170);
-		background-color: #DADAD4;
-		font-size: 10px;
-
-  }
 
 	#synthesisWindow{
 		width: 192px;
@@ -712,7 +695,15 @@ input[type=number]::-webkit-outer-spin-button {
 		/* border: 1px solid #333; */
 	}
 
-	.synthParamGroup h3{
+	.synthParamGroupHeader{
+		margin: 8px 12px;
+	}
+
+	.synthParamGroupHeader .ratioSlider{
+		margin:12px 13px 2px 4px;
+	}
+
+	#synthesisWindow h3{
 		margin: 8px 0;
 		font-size: 12px;
 	}

@@ -5,120 +5,6 @@
 function Analyzer(_parent){
 
 
-  var redNose =
-    {
-      "name": "mlt",
-      "children": [
-        {
-          "name": "add",
-          "children": [
-            {
-              "name": "frc",
-              "children": [
-                { "name": "V" }
-              ]
-            },
-            {
-              "name": "mlt",
-              "children": [
-                {
-                  "name": "sgn",
-                  "children": [
-                    {
-                      "name": "stp",
-                      "children": [
-                        {
-                          "name": "vec",
-                          "children": [
-                            { "name": "0.1" },
-                          ]
-                        },
-                        {
-                          "name": "mod",
-                          "children": [
-                            { "name": "V4.rrrr" },
-                            {
-                              "name": "vec",
-                              "children": [
-                                { "name": "0.352" },
-                                { "name": "0.94" },
-                                { "name": "0.0" },
-                                {"name": "1.0"}
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "name": "sub",
-                  "children": [
-                    {
-                      "name": "add",
-                      "children": [
-                        {
-                          "name": "vec",
-                          "children": [
-                            { "name": "0.72" },
-                            { "name": "0.129" },
-                            { "name": "0.0" },
-                            {"name": "1.0"}
-                          ]
-                        },
-                        {
-                          "name": "mlt",
-                          "children": [
-                            {
-                              "name": "sub",
-                              "children": [
-                                { "name" : "V4.rrgg"},
-                                {"name" : "V4.ggrg"}
-                              ]
-                            },
-                            {
-                              "name": "vec",
-                              "children": [
-                                {"name": "7.0"},
-                                {"name": "2.0"},
-                                {"name": "1.0"},
-                                {"name": "1.0"}
-                              ]
-                            },
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "frc",
-                      "children": [
-                        {"name": "V.rrbr"}
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "vec",
-          "children": [
-            { "name": "1.0" },
-            { "name": "0.988" },
-            { "name": "1.0" },
-            {"name": "1.0"}
-          ]
-        }
-      ]
-    };
-
-
-
-
-
-
   var parentDiv = _parent;
 
   let sketch = function(p) {
@@ -248,73 +134,11 @@ function Analyzer(_parent){
   }
 
 
-
-  function translateUtoPgmToObj(pgm){
-
-    var obj = {};
-
-    var nextOP = /[a-z]{3}\s*\(\s*/m;
-
-    //console.log(_utoPgm);
-
-    //var regAfterOP = /[^(\D{3}\s*\(\s*)]*$/m;
-
-    // 1. look for an operator and decide if it is binary or unary
-    var opLen = _utoPgm.match(nextOP)[0].length;
-
-    var op = _utoPgm.slice(_utoPgm.search(nextOP), opLen);
-
-    op = op.trim();
-
-    console.log(op);
-    // var newPgm = _utoPgm.slice(_utoPgm.search(regOP) + opLen);
-
-
-    // processUtoCode(newPgm);
-
-
-    // 3.
-
-    console.log(utoObj);
-
-
-
-
-
-
-    return obj;
-  }
-
-
-
-
-  // find the position of the closing bracket of the string
-  // assuming the str starts just after the openening one (exclusive)
-  function findClosingBracket(str) {
-    let depth = 1;
-    for (let i = pos + 1; i < str.length; i++) {
-      switch (str[i]) {
-      case '(':
-        depth++;
-        break;
-      case ')':
-        if (--depth == 0) {
-          return i;
-        }
-        break;
-      }
-    }
-    return -1;    // No matching closing parenthesis
-  }
-
-
-
-
-  this.VisualizePgm = function(pgm, containerId){
+  this.VisualizePgm = function(treeData, containerId){
 
     var treemap, svg, root;
 
-    var treeData = translateUtoPgmToObj(pgm);
+    // TODO: get depth
 
     var _wid = 256;
     var _hei = 256;
@@ -358,7 +182,7 @@ function Analyzer(_parent){
 
     update(root);
 
-    console.log(d3);
+    // console.log(d3);
 
 
     function update(source) {
